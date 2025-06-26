@@ -1,0 +1,204 @@
+---
+title: "ANA 505-2 GR5 PROJECT [Jihoon, Ashish, Elizabeth]"
+output:
+  word_document: default
+  pdf_document: default
+date: "`r Sys.Date()`"
+---
+
+# II. Data Import: 
+## EX1: Read the file “Life Expectancy Data.csv” into RStudio 
+```{r}
+Life_Expectancy <- read.csv("/Users/eli/Downloads/Life Expectancy Data.csv") # Read the CSV file into a data frame named 'Life_Expectancy'Data.csv’
+```
+
+# III. Exploratory Data Analysis (EDA): 
+## EX2: Generate the following descriptive and summary statistics 
+1. Describe 
+```{r}
+summary(Life_Expectancy) # Generate summary statistics for each column in the 'Life_Expectancy' data frame, including minimum, 1st quartile, median, mean, 3rd quartile, and maximum values.
+```
+
+2. Sum, mean, median, std for the following columns 
+```{r}
+#1) D: Life Expectancy 
+sum(Life_Expectancy$Life.expectancy, na.rm = TRUE) # Calculate the total sum of the Life Expectancy column, ignoring missing values
+mean(Life_Expectancy$Life.expectancy, na.rm = TRUE) # Calculate the mean of the Life Expectancy column, ignoring missing values
+median(Life_Expectancy$Life.expectancy, na.rm = TRUE) # Calculate the median of the Life Expectancy column, ignoring missing values
+sd(Life_Expectancy$Life.expectancy, na.rm = TRUE) # Calculate the standard deviation of the Life Expectancy column, ignoring missing values
+#2) E: Adult Mortality 
+sum(Life_Expectancy$Adult.Mortality, na.rm = TRUE) # Calculate the total sum of the Adult Mortality column, ignoring missing values
+mean(Life_Expectancy$Adult.Mortality, na.rm = TRUE) # Calculate the mean of the Adult Mortality column, ignoring missing values
+median(Life_Expectancy$Adult.Mortality, na.rm = TRUE) # Calculate the median of the Adult Mortality column, ignoring missing values
+sd(Life_Expectancy$Adult.Mortality, na.rm = TRUE) # Calculate the standard deviation of the Adult Mortality column, ignoring missing values
+#3) F: Infant Death 
+sum(Life_Expectancy$infant.deaths) # Calculate the total sum of the infant deaths column, ignoring missing values
+mean(Life_Expectancy$infant.deaths) # Calculate the mean of the infant deaths column, ignoring missing values
+median(Life_Expectancy$infant.deaths) # Calculate the median of the infant deaths column, ignoring missing values
+sd(Life_Expectancy$infant.deaths) # Calculate the standard deviation of the infant deaths column, ignoring missing values
+#4) I: Hepatitis B 
+sum(Life_Expectancy$Hepatitis.B, na.rm = TRUE) # Calculate the total sum of the Hepatitis B column, ignoring missing values
+mean(Life_Expectancy$Hepatitis.B, na.rm = TRUE)  # Calculate the mean of the Hepatitis B column, ignoring missing values
+median(Life_Expectancy$Hepatitis.B, na.rm = TRUE) # Calculate the median of the Hepatitis B column, ignoring missing values
+sd(Life_Expectancy$Hepatitis.B, na.rm = TRUE)  # Calculate the standard deviation of the Hepatitis B column, ignoring missing values
+
+#Note: some of these variables have missing values, na.rm = TRUE removes the missing values
+```
+
+## EX3: Return to a dataframe a full correlation of Life Expectancy and Measles in 2015. 
+```{r}
+LE_2015 <- subset(Life_Expectancy, Year == 2015) # Filter the dataset 'Life_Expectancy' to include only rows where the Year is 2015.
+head(LE_2015) #prints the first six rows of the 2015 subset
+cor(LE_2015[,4], LE_2015[,10], use = "complete.obs") # Calculate the correlation coefficient between Life Expectancy(col 4) and Measles (col 10) for the year 2015.
+```
+
+## EX4: Return to a dataframe a full covariance of Infant Deaths and Polio in 2015. 
+```{r}
+cov(LE_2015[,6], LE_2015[,13], use = "complete.obs") # Calculate the covariance between Infant Deaths (column 6) and Polio (column 13) for the year 2015.
+```
+
+## EX5: Use ggplot2 to draw a plot of Percentage Expenditure and GDP. Use ticks, labels,  annotations and legends.
+```{r}
+library(ggplot2)
+LE_clean <- na.omit(Life_Expectancy) # Remove rows with missing values
+ggplot(data = LE_clean, mapping = aes(x = percentage.expenditure, y = GDP, color = Status)) + #plots Percentage Expenditure vs GDP
+  geom_point(size = 1) + #adds ticks
+  labs(
+    title = "Percentage Expenditure vs GDP", #adds title
+    x = "Percentage Expenditure", #adds x-axis label
+    y = "Gross Domestic Product (GDP)", #adds y-axis label
+    color = "Country Status") + #adds legend
+  scale_color_manual(values = c("Developing" = "red", "Developed" = "green")) + # Custom colors for 'developing' and 'developed'
+  annotate("text", x = 17000, y = 9000, label = "High GDP (y = 5910.81)", color = "blue", size = 3) + # Add text annotation
+  annotate("segment", x = 0, xend = 20000, y = 5910.81, yend = 5910.81, color = "blue", linetype = "dashed")  # Add a horizontal line annotation
+#Note: High GDP is defined using the 3rd quartile value for GDP, as calculated in the EX2 summary stats.
+```
+
+## EX6: Plot a histogram of Life Expectancy
+```{r}
+hist(Life_Expectancy$Life.expectancy) # Create a histogram of the Life Expectancy column.
+```
+
+## EX7: Use R methods to produce the following scatter plots in 2015: 
+```{r}
+#1) Schooling vs GDP 
+plot(LE_2015$Schooling~LE_2015$GDP) # Create a scatter plot to examine the relationship between GDP and Schooling.
+#2) Life Expectancy vs Adult Mortality 
+plot(LE_2015$Life.expectancy~LE_2015$Adult.Mortality) # Create a scatter plot to explore the relationship between Adult Mortality and Life Expectancy.
+#3) Infant Deaths vs Measles 
+plot(LE_2015$infant.deaths~LE_2015$Measles) # Create a scatter plot to investigate the relationship between Infant deaths and Measles.
+#4) Alcohol vs Hepatitis B 
+plot(LE_2015$Alcohol~LE_2015$Hepatitis.B) # Create a scatter plot to examine the relationship between Alcohol consumption and Hepatitis B.
+#5) Under Five Death vs Polio 
+plot(LE_2015$under.five.deaths~LE_2015$Polio) # Create a scatter plot to explore the relationship between Under five deaths and Polio.
+```
+
+# IV. Modelling: You aim to identify factors that contribute to the likelihood of diabetes using classification and clustering methods. 
+## EX8: Modelling: Classification: To build a model that predicts Life Expectancy in 2015 based  on several other factors using Linear Regression. 
+```{r}
+linmod1=lm(Life.expectancy ~ Adult.Mortality, data = LE_2015) #create a linear regression model for Life.expectancy and Adult.Mortality in 2015
+summary(linmod1) #prints the results of our first linear regression
+plot(Life.expectancy ~ Adult.Mortality, data = LE_2015) #plots a scatterplot of our variables
+abline(linmod1, col="red") #adds our regression line to the scatterplot in red
+
+linmod2=lm(Life.expectancy ~ Income.composition.of.resources, data = LE_2015) #create a linear regression model for Life.expectancy and Income.composition.of.resources in 2015
+summary(linmod2) #prints the results of our second linear regression
+plot(Life.expectancy ~ Income.composition.of.resources, data = LE_2015) #plots a scatterplot of our variables
+abline(linmod2, col="red") #adds our regression line to the scatterplot in red
+
+linmod3=lm(Life.expectancy ~ Schooling, data = LE_2015) #create a linear regression model for Life.expectancy and Schooling in 2015
+summary(linmod3) #prints the results of our third linear regression
+plot(Life.expectancy ~ Schooling, data = LE_2015) #plots a scatterplot of our variables
+abline(linmod3, col="red") #adds our regression line to the scatterplot in red
+```
+
+## EX9: Modelling: Classification: To build a model that predicts Life Expectancy in 2015 based on several other factors using Random Forest (randomForest). 
+```{r}
+#Random forest with the entire Life expectancy dataset 
+#We first have to split the data into two subsets: training (70%) and test (30%)
+ind3 <- sample(2, nrow(LE_clean), replace=TRUE, prob=c(0.8, 0.2)) #makes two subsets
+train3Data <- LE_clean[ind3==1,] #80% for training subset
+val3Data <- LE_clean[ind3==2,] #20% for validation subset
+#install.packages('randomForest') #Loads in the package
+library(randomForest)
+rf3 <- randomForest(Life.expectancy ~., data=train3Data, ntree=100, proximity=TRUE) #Predict Life.expectancy with all the variables in the data
+rfpredtable<-table(predict(rf3), train3Data$Life.expectancy) #Creates a table for the predictions
+head(rfpredtable) #because this table is extensive, we decided to display on the first six rows of the predictions table
+print(rf3) #Prints the Random Forest
+attributes(rf3)
+plot(rf3) #Plots the Error Rate of Random Forest
+importance(rf3) #Prints the importance of variables
+varImpPlot(rf3) #Plots the variable importance
+LE_Pred3 <- predict(rf3, newdata=val3Data) #tests the random forest with test data
+rftable <- table(LE_Pred3, val3Data$Life.expectancy) #checked with a table
+head(rftable) #again because this table is extensive, we decided to display on the first six rows of the predictions table
+
+#Random forest with three independent variables for 2015 
+LE_2015_clean_3 <- LE_2015[!is.na(LE_2015$Adult.Mortality) & 
+                            !is.na(LE_2015$Income.composition.of.resources) & 
+                            !is.na(LE_2015$Schooling), ]  # Remove rows with missing values for our variables
+#We first have to split the data into two subsets: training (70%) and test (30%)
+ind <- sample(2, nrow(LE_2015_clean_3), replace=TRUE, prob=c(0.8, 0.2)) #makes two subsets
+trainData <- LE_2015_clean_3[ind==1,] #80% for training subset
+valData <- LE_2015_clean_3[ind==2,] #20% for validation subset
+#install.packages('randomForest') #Loads in the package
+library(randomForest)
+rf <- randomForest(Life.expectancy ~ Adult.Mortality+Income.composition.of.resources+Schooling, data=trainData, ntree=100, proximity=TRUE) #Predict Life.expectancy with the three selected variables in 2015
+rfpredtable2<-table(predict(rf), trainData$Life.expectancy) #Creates a table for the predictions
+head(rfpredtable2) #again because this table is extensive, we decided to display on the first six rows of the predictions table
+print(rf) #Prints the Random Forest
+attributes(rf)
+plot(rf) #Plots the Error Rate of Random Forest
+importance(rf) #Prints the importance of variables
+varImpPlot(rf) #Plots the variable importance
+LE_Pred <- predict(rf, newdata=valData) #tests the random forest with test data
+rftable2 <- table(LE_Pred, valData$Life.expectancy) #checked with a table
+head(rftable2) #again because this table is extensive, we decided to display on the first six rows of the predictions table
+#plot(margin(rf, valData$Life.expectancy)) would plot the margin of predictions, however, given our dependent variable and use of random forest, it does not produce anything. This is further examined in EX11. 
+```
+
+## EX10: Modelling: Classification: To group countries into developing and developed using Logistic Regression 
+```{r}
+LE_clean <- na.omit(Life_Expectancy) # Remove rows with missing values
+LE_clean$develop <- ifelse(LE_clean$Status == "Developed", 1, 0) #sets status to one if developed, zero otherwise
+set.seed(1234) #ensure reproducibility
+#We first have to split the data into two subsets: training (70%) and test (30%)
+ind2 <- sample(2, nrow(LE_clean), replace=TRUE, prob=c(0.8, 0.2)) #makes two subsets
+train2Data <- LE_clean[ind2==1,] #80% for training subset
+val2Data <- LE_clean[ind2==2,] #20% for validation subset
+mylogit <- glm(develop ~ Life.expectancy+GDP+Schooling, data=train2Data, family="binomial") #creates Logit model
+summary(mylogit) #produces summary of model created
+pred <- predict(mylogit, val2Data, type="response") #Makes a prediction for the validation data with the logit model
+model_pred_admit <- rep("0", 328) #Creates a set of 328 values, the number of observations in valdata, all equal to "0"
+model_pred_admit[pred>0.5] <- "1" #tells the model that when the prediction is greater than 0.5, the country is developed, meaning equal to one
+tab<-table(model_pred_admit, val2Data$develop) #creates a confusion matrix comparing the predicted developed country and actual developed countries
+print(tab) #Prints the confusion matrix
+1-sum(diag(tab))/sum(tab) #calculates the misclassification error of this model
+```
+
+# V. Analysis: 
+## EX11: Compare the outcomes of the Linear Regression classification techniques and those with the Random Forest classification techniques in EX8 and EX9. 
+
+With the linear regression technique, we explore the linear relationship between life expectancy in 2015 and three independent variables- adult mortality, income composition of resources, and schooling. The three models had statistically significant variables and relatively high R-squared values. The plots provided show a moderately positive correlation between life expectancy and income composition of resources as well as life expectancy and schooling. However, adult mortality seems to have a strong negative correlation. Linear regression is useful in providing clear and interpretable relationships with one independent variable, but its inability to compare multiple independent variables at once, makes it not ideal for this dataset.
+With the random forest, we are still analyzing the same three independent variables. Because our dependent variable is numerical and continuous, this technique made many predictions that were hard to understand. However, the model itself had a 88.78 percent of variance explained, which makes it a good model with room for improvement. The error rate plot shows that the error rate decreases as we increase the number of trees up to 100. All of our independent variables were also identified as important, with adult mortality being highlighted as the most important one. We could not plot the margin of predictions because the model is used for regression, which involves predicting a numerical and continuous variable, and margin plots are typically used for classification tasks.
+While the linear regression provided better visuals and clarity, overall, the random forest was better accurately as it offered robust modeling for non-linear interactions and offered insights of multiple independent variables.
+
+## EX12: Interpretation and Conclusions: Analyze which features are contributing the most to  Life Expectancy in EX9-EX10. 
+
+To determine the independent variables that contributed the most to Life Expectancy, the random forest’s abilities to identify variables of importance was especially useful. We first ran the model with all of the variables in the dataset. Using the importance function and the variable importance plot, we assessed which variables were both logically and statistically valuable. We found adult mortality, income composition of resources, schooling to be the best. We reran the model with these select variables to help compare the results of the different techniques including the results of the linear regression. 
+For the logistic model, we were analyzing the country status (develop/developing). We used the variables life expectancy, GDP, and schooling to make our model. All three variables were statistically significant and the model had a low misclassification error of approximately 10%. While this model was not used to specifically assess the life expectancy variable, we can see that it has much influence, as it is strongly associated, in the development of a country. 
+
+## EX13: Conclusions: Draw any conclusions from the outcomes in EX8-EX10.
+
+All of our models have consistently identified adult mortality, income composition of resources, and schooling as critical contributors to life expectancy. However, these may not be all the significant independent variables, more testing would be needed to determine whether there are more. As discussed in EX11, our linear regression models highlighted the correlations between each independent variable tested and life expectancy. As countries receive more resources and schooling services, life expectancy increases. It follows that if adults are increasingly dying, it strongly impacts the decrease of life expectancy. Given the complexity of the life expectancy variable, using a single independent variable for predictions is not advised as seen by the decent but not significantly high R-squared values ranging from 61% to 82%. The random forest models then emphasised the importance of these variables in 2015 to life expectancy. It should be noted that EX8 and EX9 use the 2015 subset of the life expectancy dataset, which offers limited data that might not reflect patterns from previous years. Finally, with the logistic model, we analyzed variables that contribute to a country’s development status. Developed countries were seen to be related to higher life expectancy, GDP, and schooling, as seen by the positive coefficients. While this model has a relatively high overall accuracy rate (90%), it also has a relatively high false positive rate (24%), meaning it mistakenly identifies countries that are developing as developed. Unlike EX8 and EX9, the logit model uses the entire life expectancy dataset. The additional data provided could help explain why the accuracy is the highest with this model.
+
+# Reflections
+
+1. List three things you learned in completing your Project 
+(1) Data cleaning and preparation - learned how to handle missing values effectively using functions like na.omit and understand the importance of clean data for analysis. (2) Visualizing insights - developed skills in creating meaningful plots with ggplot2, such as scatter plots and histograms, and learned to annotate key points in the data for better understanding. (3) Gained experience in using Linear Regression, Random Forest and logistic regression to predict outcomes, and understood how to interpret model outputs, such as feature importance.
+
+2. List three problems you encountered in completing your Project, and  how did you resolve them 
+(1) The dataset had missing values that caused errors in calculations and model training. Used na.omit to remove rows with missing values and verified data completeness before proceeding with analysis. Then for tasks that required data from 2015, we had limited information, especially after removing rows with empty values. We fixed this by consulting with you first and either removing only empty values from select variables or restoring the larger dataset. (2) We had difficulty using ggplot, especially when it came to annotation and legends, as this is something we had not practiced before. Fortunately, the textbook provided a starting point and we were able to research details the function includes. (3) We also had issues with the models themselves. When we tried using all variables to run the model, we got NA’s. We were able to whittle it down to a handful of variables by plotting each individual variable against the outcome variable and also doing individual models for various combinations of variables against the outcome variable. This allowed us to understand which variables were statistically significant enough to retain in their respective models and give us the desired output.
+
+3. List one suggestion to improve the Project
+Providing a clear explanation (maybe a data dictionary) of each variable in the dataset would help avoid misinterpretation and ensure accurate calculations and visualizations.
