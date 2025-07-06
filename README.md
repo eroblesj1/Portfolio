@@ -41,6 +41,11 @@ Projects span classification, forecasting, policy analysis, and qualitative rese
 - **Includes**: Memo (Word doc)
 - **Focus**: Conducted thematic analysis of student responses to understand perceptions of instructor presence in virtual learning.
 
+### 💬 **Practicum 4: Predicting Student Graduation and Dropout**
+- **Tools**: Python
+- **Includes**: Report with embedded code
+- **Focus**: Built machine learning models to predict whether a student will graduate or drop out based on demographic, socioeconomic, and academic data.
+  
 ---
 
 ## 🛠️ How to View or Run
